@@ -2,8 +2,9 @@
 
 namespace App\Core;
 
-use ReflectionMethod;
 use App\Http\Request;
+use ReflectionMethod;
+use ReflectionFunction;
 use App\Http\Middlewares\VerifyCsrf;
 
 
@@ -82,33 +83,42 @@ class Route
                     (new $route['middleware'])->handle();
                 }
 
-                $controller = new $route['controller'][0]();
-                $method = $route['controller'][1];
-
-
-                $reflectionMethod = new ReflectionMethod($controller, $method);
-                $parameters = $reflectionMethod->getParameters();
-
-                foreach ($parameters as $key => $argument) {
-                    if ($argument?->getType()?->getName() === Request::class) {
-                        $request = new Request();
-                        break;
-                    }
-                }
-
                 if (isset($matches) && $matches == true) {
                     array_shift($matches);
                 } else {
                     $matches = [];
                 }
 
-                if (isset($request)) {
-                    $controller->$method($request, ...$matches);
-                    return;
+                if (is_array($route['controller'])) {
+                    $controller = new $route['controller'][0]();
+                    $method = $route['controller'][1];
+                    $reflectionMethod = new ReflectionMethod($controller, $method);
                 } else {
-                    $controller->$method(...$matches);
-                    return;
+                    $reflectionMethod = new ReflectionFunction($route['controller']);
                 }
+
+
+                $parameters = $reflectionMethod->getParameters();
+
+
+
+                $dependencies = [];
+
+                foreach ($parameters as $argument) {
+                    if ($argument?->getType()?->getName() === Request::class) {
+                        array_push($dependencies, new Request());
+                        break;
+                    }
+                }
+
+                if (!empty($matches)) {
+                    foreach ($matches as  $match) {
+                        array_push($dependencies, $match);
+                    }
+                }
+                is_array($route['controller']) ? $controller->$method(...$dependencies) : $route['controller'](...$dependencies);
+                // is_array($route['controller']) ? call_user_func_array([$controller, $method], $dependencies) : call_user_func_array($route['controller'], $dependencies);
+                return;
             }
         }
 
