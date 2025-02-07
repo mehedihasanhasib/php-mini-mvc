@@ -1,0 +1,16 @@
+{
+    "name": "hasib/php-mini-mvc",
+    "description": "this is a mini mvc framework for php",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mehedi Hasan Hasib",
+            "email": "mehedi.mh50@gmail.com"
+        }
+    ],
+    "require": {}
+}
