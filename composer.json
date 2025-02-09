@@ -12,5 +12,8 @@
             "email": "mehedi.mh50@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "illuminate/http": "^11.41",
+        "spiral/dumper": "^3.2"
+    }
 }

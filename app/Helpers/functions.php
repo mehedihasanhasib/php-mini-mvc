@@ -3,6 +3,7 @@
 use App\Core\Auth;
 use App\Core\Route;
 use App\Core\Session;
+use App\Core\Controller;
 
 function layout(string $layout, array $data = [])
 {
@@ -20,9 +21,6 @@ function component(string $component, array $data = [])
 
 function route($name, $params = [])
 {
-    // global $router;
-    // return $router->url($name, $params);
-
     return Route::url($name, $params);
 }
 
@@ -60,8 +58,7 @@ function auth()
 
 function public_path($path = "")
 {
-    // dd(str_replace('\\', "/", $path));
-    return BASE_PATH . "/" . str_replace('\\', "/", $path);
+    return BASE_PATH . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . str_replace('\\', "/", $path);
 }
 
 function isRoute($path)
@@ -84,16 +81,23 @@ function csrf_token()
     if (Session::has('csrf_token')) {
         return Session::get('csrf_token');
     }
-    
+
     Session::put('csrf_token', bin2hex(random_bytes(32)));
     return Session::get('csrf_token');
+}
+
+function view($view)
+{
+    $controller = new Controller();
+    $controller->view($view);
 }
 
 function dd($value)
 {
     echo '<pre>';
-    var_dump($value);
-    echo "</pre>";
+    // var_dump($value);
     http_response_code(500);
+    dump($value);
+    echo "</pre>";
     exit;
 }
